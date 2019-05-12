@@ -10,11 +10,26 @@ const UserSchema = new Schema({
     type: String,
     required: true,
     unique: true,
+    match: [/.+@.+\../, 'A valid email address must be used!']
   },
   password: {
     type: String,
     required: true,
-  }
+  },
+  first_name: {
+    type: String,
+    trim: true,
+    required: true
+  },
+  last_name: {
+    type: String,
+    trim: true,
+    required: true
+  },
+  full_name: {
+    type: String
+  },
+  bookmarks: []
 });
 
 UserSchema.pre('save', function createPassword(next) {
@@ -33,7 +48,7 @@ UserSchema.pre('save', function createPassword(next) {
   }
 });
 
-UserSchema.methods.isCorrectPassword = function checkPassword(password) {
+UserSchema.methods.isCorrectPassword = function isCorrectPassword(password) {
   const document = this;
   return new Promise((resolve, reject) => {
     console.log(document);
@@ -46,6 +61,11 @@ UserSchema.methods.isCorrectPassword = function checkPassword(password) {
       }
     });
   });
+};
+
+UserSchema.methods.setFullName = function setFullName() {
+  this.full_name = `${this.first_name} ${this.last_name}`;
+  return this.full_name;
 };
 
 module.exports = mongoose.model('User', UserSchema);
