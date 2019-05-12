@@ -17,7 +17,7 @@ const UserSchema = new Schema({
   }
 });
 
-UserSchema.pre('save', function(next) {
+UserSchema.pre('save', function createPassword(next) {
   if (this.isNew || this.isModified('password')) {
     const document = this;
     bcrypt.hash(this.password, saltRounds, (err, hashedPassword) => {
@@ -33,11 +33,11 @@ UserSchema.pre('save', function(next) {
   }
 });
 
-UserSchema.methods.isCorrectPassword = function(password) {
+UserSchema.methods.isCorrectPassword = function checkPassword(password) {
   const document = this;
   return new Promise((resolve, reject) => {
     console.log(document);
-    bcrypt.compare(password, document.password, function(err, same) {
+    bcrypt.compare(password, document.password, function compareCallback(err, same) {
       if (err) {
         console.log(err)
         reject(err);

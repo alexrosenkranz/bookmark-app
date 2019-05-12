@@ -1,5 +1,7 @@
-const { User } = require('../models');
+/* eslint-disable no-underscore-dangle */
 const jwt = require('jsonwebtoken');
+const { User } = require('../models');
+
 const secret = 'mysecretsshhh';
 
 const handle = promise => promise.then(res => [null, res]).catch(err => [err, null]);
@@ -30,9 +32,9 @@ module.exports = {
   /* ================= */
   async login(req, res) {
     const { email, password } = req.body;
-    const [err, user] = await handle(User.findOne({ email }));
-    if (err) {
-      console.error(err);
+    const [findErr, user] = await handle(User.findOne({ email }));
+    if (findErr) {
+      console.error(findErr);
       res.status(500).json({
         error: 'Internal error please try again'
       });
@@ -41,8 +43,8 @@ module.exports = {
         error: 'Incorrect email or password'
       });
     } else {
-      const [err, same] = await handle(user.isCorrectPassword(password));
-      if (err) {
+      const [pwErr, same] = await handle(user.isCorrectPassword(password));
+      if (pwErr) {
         res.status(500).json({
           error: 'Internal error please try again'
         });
@@ -52,7 +54,6 @@ module.exports = {
         });
       } else {
         // Issue token
-        console.log('hit here');
         console.log(user);
         const payload = { _id: user._id, email };
         const token = jwt.sign(payload, secret, {
