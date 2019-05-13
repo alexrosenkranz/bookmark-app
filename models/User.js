@@ -5,6 +5,18 @@ const saltRounds = 10;
 
 const { Schema } = mongoose;
 
+const BookmarkSchema = new Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  link: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+});
+
 const UserSchema = new Schema({
   email: {
     type: String,
@@ -14,25 +26,25 @@ const UserSchema = new Schema({
   },
   password: {
     type: String,
-    required: true,
+    required: true
   },
-  first_name: {
+  firstName: {
     type: String,
     trim: true,
     required: true
   },
-  last_name: {
+  lastName: {
     type: String,
     trim: true,
     required: true
   },
-  full_name: {
+  fullName: {
     type: String
   },
-  bookmarks: []
+  bookmarks: [BookmarkSchema]
 });
 
-UserSchema.pre('save', function createPassword(next) {
+UserSchema.pre('save', function createUser(next) {
   if (this.isNew || this.isModified('password')) {
     const document = this;
     bcrypt.hash(this.password, saltRounds, (err, hashedPassword) => {
@@ -54,7 +66,7 @@ UserSchema.methods.isCorrectPassword = function isCorrectPassword(password) {
     console.log(document);
     bcrypt.compare(password, document.password, function compareCallback(err, same) {
       if (err) {
-        console.log(err)
+        console.log(err);
         reject(err);
       } else {
         resolve(same);
@@ -64,8 +76,8 @@ UserSchema.methods.isCorrectPassword = function isCorrectPassword(password) {
 };
 
 UserSchema.methods.setFullName = function setFullName() {
-  this.full_name = `${this.first_name} ${this.last_name}`;
-  return this.full_name;
+  this.fullName = `${this.firstName} ${this.lastName}`;
+  return this.fullName;
 };
 
 module.exports = mongoose.model('User', UserSchema);
