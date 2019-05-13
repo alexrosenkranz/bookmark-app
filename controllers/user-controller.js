@@ -1,10 +1,10 @@
 /* eslint-disable no-underscore-dangle */
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
+const handle = require('../utils/promise-handler');
 
+// hide this in a .env file (also in middleware/auth.js)
 const secret = 'mysecretsshhh';
-
-const handle = promise => promise.then(res => [null, res]).catch(err => [err, null]);
 
 module.exports = {
   async getUserProfile(req, res) {
@@ -17,9 +17,12 @@ module.exports = {
   },
   /* ================= */
   async register(req, res) {
-    const { email, password } = req.body;
+    const { email, password, firstName, lastName } = req.body;
 
-    const user = new User({ email, password });
+    const user = new User({ email, password, firstName, lastName });
+
+    user.setFullName();
+
     user.save(err => {
       if (err) {
         console.log(err);
@@ -59,10 +62,9 @@ module.exports = {
         const token = jwt.sign(payload, secret, {
           expiresIn: '1h'
         });
-        res
-          .cookie('token', token, { httpOnly: true })
-          .status(200)
-          .json(token);
+        res.status(200).json(token);
+        // if you want session cookies
+        // .cookie('token', token, { httpOnly: true })
       }
     }
   }
